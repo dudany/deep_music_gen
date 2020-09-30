@@ -12,9 +12,10 @@ from utils import compute_loss, PeriodicPlotter, get_batch
 from config import batch_size
 
 
-@tf.function
+# @tf.function
 def train_step(x, y, model, optimizer_obj):
     # Use tf.GradientTape()
+    print('train step')
     with tf.GradientTape() as tape:
         y_hat = model(x)
         loss = compute_loss(y, y_hat)
