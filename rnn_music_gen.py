@@ -1,13 +1,13 @@
 import pandas as pd
 # import pydub
 import os
-from tqdm import tqdm
+import tensorflow as tf
 from collections import namedtuple
-
 from scipy.io.wavfile import read, write
-
-from config import embedding_dim, rnn_units, batch_size
+from config import embedding_dim, rnn_units, batch_size, learning_rate, num_training_iterations
+from utils import compute_loss, PeriodicPlotter, get_batch
 from model import build_model
+from tqdm import tqdm
 
 """**If you want to train your model on mp3 files, the following lines of code will do the trick.**"""
 
@@ -39,3 +39,10 @@ for i, f in enumerate(os.listdir(data_path)):  # todo Remove the i filter for fu
 # We will make 2 RNN models for each of the data, lets the Define the RNN model class
 # TODO : check about the vocab size
 model1 = build_model(vocab_size, embedding_dim, rnn_units, batch_size)
+
+optimizer = tf.keras.optimizers.Adam(learning_rate)
+
+
+
+
+

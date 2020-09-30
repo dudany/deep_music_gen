@@ -2,6 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from IPython import display as ipythondisplay
+import tensorflow as tf
+
+
+def compute_loss(labels, logits):
+    loss = tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
+    return loss
 
 
 def get_batch(vectorized_songs, seq_length, batch_size):
@@ -45,7 +51,7 @@ class PeriodicPlotter:
             else:
                 raise ValueError("unrecognized parameter scale {}".format(self.scale))
 
-            plt.xlabel(self.xlabel);
+            plt.xlabel(self.xlabel)
             plt.ylabel(self.ylabel)
             ipythondisplay.clear_output(wait=True)
             ipythondisplay.display(plt.gcf())
