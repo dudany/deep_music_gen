@@ -4,7 +4,7 @@ import os
 import tensorflow as tf
 from collections import namedtuple
 from scipy.io.wavfile import read, write
-from config import embedding_dim, rnn_units, batch_size, learning_rate, num_training_iterations
+from config import embedding_dim, rnn_units, batch_size, learning_rate
 from utils import compute_loss, PeriodicPlotter, get_batch
 from model import build_model
 from tqdm import tqdm

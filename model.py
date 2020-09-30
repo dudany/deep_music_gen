@@ -11,9 +11,9 @@ def LSTM(rnn_units):
     )
 
 
-def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
+def build_model(input_dim, embedding_dim, rnn_units, batch_size):
     model = tf.keras.Sequential(
-        [tf.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape=[batch_size, None]),
-         LSTM(rnn_units), tf.keras.layers.Dense(vocab_size)])
+        [tf.keras.layers.Embedding(input_dim, embedding_dim, batch_input_shape=[batch_size, None]),
+         LSTM(rnn_units), tf.keras.layers.Dense(input_dim)])
 
     return model
