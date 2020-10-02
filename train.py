@@ -26,7 +26,6 @@ def train_step(x, y, model, optimizer_obj):
     optimizer_obj.apply_gradients(zip(grads, model.trainable_variables))
     return loss
 
-
 def train_defined_model_per_vec(model, optimizer_obj, vectorized_data, params):
     # model params definition
     history = []
