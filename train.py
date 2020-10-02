@@ -12,7 +12,7 @@ from utils import compute_loss, PeriodicPlotter, get_batch
 from config import batch_size
 
 
-# @tf.function
+@tf.function
 def train_step(x, y, model, optimizer_obj):
     # Use tf.GradientTape()
     print('train step')

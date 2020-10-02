@@ -11,5 +11,5 @@ embedding_dim = 256
 rnn_units = 1024  # Experiment between 1 and 2048
 
 # Data Flow
-data_path = '/Users/dani/PycharmProjects/deep_music_gen/Full_Drum_Loops'
+data_path = '/Users/dani/PycharmProjects/deep_music_gen/data/edm_progression_piano'
 checkpoint_prefix = '/model_checkpoints/'
