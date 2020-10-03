@@ -1,8 +1,8 @@
 import os
-from typing import List, Dict
-
+import numpy as np
 import music21
 from music21 import note, chord
+from typing import List, Dict, Tuple
 
 
 def run_data_extraction(path: str) -> List:
@@ -11,24 +11,35 @@ def run_data_extraction(path: str) -> List:
     :param path:
     :return:
     """
+
     notes_data = []
     for i, f in enumerate(os.listdir(path)):
         file_p = os.path.join(path, f)
-        midi_file = music21.converter.parse(file_p)
-        midi_notes = extract_notes_from_midi(midi_file)
-        notes_data.append(midi_notes)
+        if os.path.isdir(file_p):
+            temp_list = run_data_extraction(file_p)
+            for n in temp_list:
+                notes_data.append(n)
+        elif os.path.splitext(file_p)[1] == '.mid':
+            midi_file = music21.converter.parse(file_p)
+            midi_notes = extract_notes_from_midi(midi_file)
+            for n in midi_notes:
+                notes_data.append(n)
     return notes_data
 
 
-def get_notes_mapping_dict(notes_list: List[List]) -> Dict:
+def get_notes_mapping_dict(notes_list: List) -> Tuple[Dict, np.array]:
+    """
+    Function get list of midi notes and returns mapping for each note
+
+    :param notes_list:
+    :return:
+    """
     assert len(notes_list) > 0, 'Empty notes list !!'
-    full_list = []
-    for songs_notes in notes_list:
-        for note_e in songs_notes:
-            full_list.append(note_e)
-    full_list = set(full_list)
-    mapping = {note_e: i for i, note_e in enumerate(full_list)}
-    return mapping
+
+    full_list = sorted(set(notes_list))
+    notes2idx = {note_e: i for i, note_e in enumerate(full_list)}
+    idx2note = np.array(full_list)
+    return notes2idx, idx2note
 
 
 def extract_notes_from_midi(midi_file: music21.stream.Stream) -> List:
@@ -52,3 +63,8 @@ def extract_notes_from_midi(midi_file: music21.stream.Stream) -> List:
             notes.append('.'.join(str(n) for n in element.normalOrder))
 
     return notes
+
+
+def vectorize_notes_by_mapping(notes_list: List, mapping: Dict) -> np.array:
+    vectorized_output = np.array([mapping[char] for char in notes_list])
+    return vectorized_output
