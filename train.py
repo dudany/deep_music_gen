@@ -1,45 +1,37 @@
+import argparse
 import os
 import pandas as pd
 import fire as fire
-import tensorflow as tf
-from scipy.io.wavfile import read
 from tqdm import tqdm
-from collections import namedtuple
-from config import checkpoint_prefix, rnn_units, embedding_dim, learning_rate, data_path, seq_length, \
-    training_iterations
-from model import build_model
-from utils import compute_loss, PeriodicPlotter, get_batch
-from config import batch_size
+
+from config import data_path, batch_size, embedding_dim, rnn_units, optimizer_rep, learning_rate, training_iterations, \
+    checkpoint_prefix, seq_length
+
+from data_extraction import run_data_extraction, get_notes_mapping_dict, vectorize_notes_by_mapping
+from model import build_model, set_optimizer, train_step
+from utils import PeriodicPlotter, get_batch
 
 
-@tf.function
-def train_step(x, y, model, optimizer_obj):
-    # Use tf.GradientTape()
-    print('train step')
-    with tf.GradientTape() as tape:
-        y_hat = model(x)
-        loss = compute_loss(y, y_hat)
-    # Now, compute the gradients
-    grads = tape.gradient(loss, model.trainable_variables)
+def train(args):
+    # First we extract the Data and vectorize it
+    list_test = run_data_extraction(args.data_path)
+    notes2idx, idx2note = get_notes_mapping_dict(list_test)
+    notes_vec = vectorize_notes_by_mapping(list_test, notes2idx)
 
-    # Apply the gradients to the optimizer so it can update the model accordingly
-    optimizer_obj.apply_gradients(zip(grads, model.trainable_variables))
-    return loss
+    # Now we set the model and the optimizer
+    model = build_model(len(notes_vec), args.embedding_dim, args.rnn_units, args.batch_size)
+    optimizer = set_optimizer(args.optimizer, args.learning_rate)
 
-def train_defined_model_per_vec(model, optimizer_obj, vectorized_data, params):
-    # model params definition
+    # train the model
     history = []
     plotter = PeriodicPlotter(sec=2, xlabel='Iterations', ylabel='Loss')
-    seq_length = params['seq_length']
-    batch_size = params['batch_size']
-    training_iterations = params['training_iterations']
-
     if hasattr(tqdm, '_instances'): tqdm._instances.clear()  # clear if it exists
 
-    for iter in tqdm(range(training_iterations)):
+    for iter in tqdm(range(args.training_iterations)):
+
         # Grab a batch and propagate it through the network
-        x_batch, y_batch = get_batch(vectorized_data, seq_length, batch_size)
-        loss = train_step(x_batch, y_batch, model, optimizer_obj)
+        x_batch, y_batch = get_batch(notes_vec, args.seq_length, args.batch_size)
+        loss = train_step(x_batch, y_batch,model,optimizer)
 
         # Update the progress bar
         history.append(loss.numpy().mean())
@@ -47,49 +39,28 @@ def train_defined_model_per_vec(model, optimizer_obj, vectorized_data, params):
 
         # Update the model with the changed weights!
         if iter % 100 == 0:
-            model.save_weights(checkpoint_prefix)
+            model.save_weights(args.checkpoint_prefix)
 
     # Save the trained model and the weights
-    model.save_weights(checkpoint_prefix)
+    model.save_weights(args.checkpoint_prefix)
 
 
-def train(params):
-    batch_size = params['batch_size']
-    rnn_units = params['rnn_units']
-    embedding_dim = params['embedding_dim']
-    learning_rate = params['learning_rate']
-
-    # reading data
-    MusicTup = namedtuple('MusicTup', ['rate', 'music_arr1', 'music_arr2'])
-    data_path = params['data_path']
-    data_list = []
-    vocab_size = 0
-
-    for i, f in enumerate(os.listdir(data_path)):  # todo Remove the i filter for full data
-        if i < 1:
-            path2f = os.path.join(data_path, f)
-            if os.path.isfile(path2f):
-                rate, music = read(path2f)
-                music_df = pd.DataFrame(music)
-                music_arr1 = music_df.iloc[:, 0].to_numpy()
-                music_arr2 = music_df.iloc[:, 1].to_numpy()
-                data_list.append(MusicTup(rate, music_arr1, music_arr2))
-                vocab_size += len(music_df)
-        else:
-            continue
-
-    # models definition for both vectorial data spaces
-    model1 = build_model(len(data_list[0].music_arr1), embedding_dim, rnn_units, batch_size)
-
-    # optimizer definition
-    optimizer = tf.keras.optimizers.Adam(learning_rate)
-
-    train_defined_model_per_vec(model1, optimizer, data_list[0].music_arr1, params)
+def parse_args():
+    parser = argparse.ArgumentParser("Train and Test Music Gen with midi files")
+    parser.add_argument('--data_path', type=str, default=data_path, help='location of the data corpus')
+    parser.add_argument('--batch_size', type=int, default=batch_size,
+                        help='how many instances for encoding and normalization at each step')
+    parser.add_argument('--seq_length', type=int, default=seq_length, help='Enter sequence length for each batch')
+    parser.add_argument('--embedding_dim', type=int, default=embedding_dim,
+                        help='Enter the output dim for the embedding level in input layer')
+    parser.add_argument('--rnn_units', type=int, default=rnn_units, help='number of RNN units in the LSTM layer')
+    parser.add_argument('--optimizer', type=str, default=optimizer_rep, help='text name of the wanted optimizer')
+    parser.add_argument('--learning_rate', type=float, default=learning_rate, help='optimizer learning rate')
+    parser.add_argument('--training_iterations', type=int, default=training_iterations)
+    parser.add_argument('--checkpoint_prefix', type=str, default=checkpoint_prefix)
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
-    params = {'batch_size': batch_size, 'rnn_units': rnn_units, 'embedding_dim': embedding_dim,
-              'learning_rate': learning_rate, 'data_path': data_path, 'seq_length': seq_length,
-              'training_iterations': training_iterations}
-
-    fire.Fire(train(params))
+    args = parse_args()
+    fire.Fire(train(args))
