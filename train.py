@@ -5,12 +5,15 @@ from config import data_path, batch_size, embedding_dim, rnn_units, optimizer_re
     checkpoint_prefix, seq_length
 from data_extraction import run_data_extraction, get_notes_mapping_dict, vectorize_notes_by_mapping
 from model import build_model, set_optimizer, train_step
-from utils import PeriodicPlotter, get_batch
+from utils import PeriodicPlotter, get_batch, get_path_to_loc
 
 
 def train(args):
     # First we extract the Data and vectorize it
-    list_test = run_data_extraction(args.data_path)
+    data_loc = get_path_to_loc(args.data_path)
+    checkpoint_path = get_path_to_loc(args.checkpoint_prefix)
+
+    list_test = run_data_extraction(data_loc)
     notes2idx, idx2note = get_notes_mapping_dict(list_test)
     notes_vec = vectorize_notes_by_mapping(list_test, notes2idx)
 
@@ -35,7 +38,7 @@ def train(args):
 
         # Update the model with the changed weights!
         if iter % 100 == 0:
-            model.save_weights(args.checkpoint_prefix)
+            model.save_weights(checkpoint_path)
 
     # Save the trained model and the weights
     model.save_weights(args.checkpoint_prefix)

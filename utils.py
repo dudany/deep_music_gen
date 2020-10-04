@@ -1,9 +1,15 @@
+import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
 from IPython import display as ipythondisplay
 import tensorflow as tf
 
+def get_path_to_loc(path):
+    local_path = os.getcwd()
+    abs_path = os.path.join(local_path,path)
+    return abs_path
 
 def compute_loss(labels, logits):
     loss = tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)

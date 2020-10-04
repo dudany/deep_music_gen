@@ -11,5 +11,5 @@ rnn_units = 1024  # Experiment between 1 and 2048
 optimizer_rep = 'adam'
 
 # Data Flow
-data_path = '/Users/dani/PycharmProjects/deep_music_gen/data/'
-checkpoint_prefix = '/Users/dani/PycharmProjects/deep_music_gen/data/model_checkpoints/'
+data_path = 'data'
+checkpoint_prefix = 'data/model_checkpoints'
