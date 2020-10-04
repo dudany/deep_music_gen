@@ -13,7 +13,4 @@ optimizer_rep = 'adam'
 
 # Data Flow
 data_path = '/Users/dani/PycharmProjects/deep_music_gen/data/'
-checkpoint_prefix = '/deep_music_gen/data/model_checkpoints/'
-
-
-
+checkpoint_prefix = '/Users/dani/PycharmProjects/deep_music_gen/data/model_checkpoints/'

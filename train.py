@@ -1,12 +1,8 @@
 import argparse
-import os
-import pandas as pd
 import fire as fire
 from tqdm import tqdm
-
 from config import data_path, batch_size, embedding_dim, rnn_units, optimizer_rep, learning_rate, training_iterations, \
     checkpoint_prefix, seq_length
-
 from data_extraction import run_data_extraction, get_notes_mapping_dict, vectorize_notes_by_mapping
 from model import build_model, set_optimizer, train_step
 from utils import PeriodicPlotter, get_batch
@@ -31,7 +27,7 @@ def train(args):
 
         # Grab a batch and propagate it through the network
         x_batch, y_batch = get_batch(notes_vec, args.seq_length, args.batch_size)
-        loss = train_step(x_batch, y_batch,model,optimizer)
+        loss = train_step(x_batch, y_batch, model, optimizer)
 
         # Update the progress bar
         history.append(loss.numpy().mean())
