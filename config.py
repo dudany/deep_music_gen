@@ -1,5 +1,4 @@
 # Optimization parameters:
-import os
 
 training_iterations = 2000  # Increase this to train longer
 batch_size = 4  # Experiment between 1 and 64
