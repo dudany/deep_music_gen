@@ -12,4 +12,4 @@ optimizer_rep = 'adam'
 
 # Data Flow
 data_path = 'data'
-checkpoint_prefix = 'data/model_checkpoints'
+checkpoint_prefix = 'data/model_checkpoints/'

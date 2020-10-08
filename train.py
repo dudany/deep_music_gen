@@ -23,10 +23,10 @@ def train(args):
 
     # train the model
     history = []
-    plotter = PeriodicPlotter(sec=2, xlabel='Iterations', ylabel='Loss')
+    # plotter = PeriodicPlotter(sec=2, xlabel='Iterations', ylabel='Loss') todo
     if hasattr(tqdm, '_instances'): tqdm._instances.clear()  # clear if it exists
 
-    for iter in tqdm(range(args.training_iterations)):
+    for iteration in tqdm(range(args.training_iterations)):
 
         # Grab a batch and propagate it through the network
         x_batch, y_batch = get_batch(notes_vec, args.seq_length, args.batch_size)
@@ -34,10 +34,10 @@ def train(args):
 
         # Update the progress bar
         history.append(loss.numpy().mean())
-        plotter.plot(history)
+        # plotter.plot(history) Todo: put back
 
         # Update the model with the changed weights!
-        if iter % 100 == 0:
+        if iteration % 100 == 0:
             model.save_weights(checkpoint_path)
 
     # Save the trained model and the weights
@@ -61,5 +61,5 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    fire.Fire(train(args))
+    parsed_args = parse_args()
+    fire.Fire(train(parsed_args))
